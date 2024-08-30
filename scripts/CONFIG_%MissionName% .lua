@@ -1,0 +1,25 @@
+--Mandatory Config:
+
+--Optional Config:
+
+-------------------------------------------------------------------LifeHandler-------------------------------------------------------------------
+--LifeHandlerConfig_MaxLives = 3
+--LifeHandlerConfig_MaxRegainedLives = 2
+--LifeHandlerConfig_SaveDataSubfolder = 'saves/'
+--LifeHandlerConfig_saveDataPrefix = MissionName .. '_'
+--LifeHandlerConfig_exemptionCheck = { -- aircraft **IN** this list **NOT** carrying the listed weapons will be exempt from losing lives. in other words, this is a list of banned weapons to allow the aircraft to be permitted to not use a life.
+--                         -- {Weapon.Category.SHELL, Weapon.Category.MISSILE, Weapon.Category.ROCKET, Weapon.Category.BOMB, Weapon.Category.TORPEDO}
+--     ['UH-1H'] =         { Weapon.Category.MISSILE, Weapon.Category.ROCKET, Weapon.Category.BOMB, Weapon.Category.TORPEDO },
+--     ['UH-60L'] =        { Weapon.Category.MISSILE, Weapon.Category.ROCKET, Weapon.Category.BOMB, Weapon.Category.TORPEDO },
+--     ['Hercules'] =      { Weapon.Category.SHELL, Weapon.Category.MISSILE, Weapon.Category.ROCKET, Weapon.Category.BOMB, Weapon.Category.TORPEDO },
+--     --['CH-47D'] =        { Weapon.Category.MISSILE, Weapon.Category.ROCKET, Weapon.Category.BOMB, Weapon.Category.TORPEDO },
+--     ['Mi-8MT'] =        { Weapon.Category.MISSILE, Weapon.Category.ROCKET, Weapon.Category.BOMB, Weapon.Category.TORPEDO },
+--     ['SA342L'] =        { Weapon.Category.MISSILE, Weapon.Category.ROCKET, Weapon.Category.BOMB, Weapon.Category.TORPEDO },
+--     ['SA342M'] =        { Weapon.Category.MISSILE, Weapon.Category.ROCKET, Weapon.Category.BOMB, Weapon.Category.TORPEDO },
+--     ['SA342Minigun'] =  { Weapon.Category.MISSILE, Weapon.Category.ROCKET, Weapon.Category.BOMB, Weapon.Category.TORPEDO },
+--     ['SA342Mistral'] =  { Weapon.Category.MISSILE, Weapon.Category.ROCKET, Weapon.Category.BOMB, Weapon.Category.TORPEDO },
+--     ['OH-58D'] =        { Weapon.Category.MISSILE, Weapon.Category.ROCKET, Weapon.Category.BOMB, Weapon.Category.TORPEDO },
+--     ['OH58D'] =         { Weapon.Category.MISSILE, Weapon.Category.ROCKET, Weapon.Category.BOMB, Weapon.Category.TORPEDO },
+--     ['Mi-24P'] =        { Weapon.Category.MISSILE, Weapon.Category.ROCKET, Weapon.Category.BOMB, Weapon.Category.TORPEDO },
+-- }
+--LifeHandlerConfig_adminCommandsBypassMaxRegainedLives = true
