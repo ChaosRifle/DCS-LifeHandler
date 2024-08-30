@@ -1,7 +1,7 @@
 LifeHandler = true
 --requires codebases:               tableIO and ChaosTools for logging/saving data
 --requires config file containing:  MissionName, FilePath
---optional config file containing:  LifeHandlerConfig_MaxLives, LifeHandlerConfig_MaxRegainedLives, LifeHandlerConfig_SaveDataSubfolder, LifeHandlerConfig_saveDataPrefix, LifeHandlerConfig_exemptionCheck
+--optional config file containing:  LifeHandlerConfig_MaxLives, LifeHandlerConfig_MaxRegainedLives, LifeHandlerConfig_SaveDataSubfolder, LifeHandlerConfig_saveDataPrefix, LifeHandlerConfig_exemptionCheck, LifeHandlerConfig_adminCommandsBypassMaxRegainedLives
 
 if false then --parser fixing
     net = ''
@@ -46,7 +46,7 @@ local exemptionCheck = { -- aircraft **IN** this list **NOT** carrying the liste
     ['Mi-24P'] =        { Weapon.Category.MISSILE, Weapon.Category.ROCKET, Weapon.Category.BOMB, Weapon.Category.TORPEDO },
 }
 local boolNumberConverter = {[true] = 1, [false] = 0}
-local adminBypassMaxRegainedLives = true
+local adminCommandsBypassMaxRegainedLives = true
 
 
 --load config data if it exists
@@ -64,6 +64,9 @@ if LifeHandlerConfig_saveDataPrefix then
 end
 if LifeHandlerConfig_exemptionCheck then
     exemptionCheck = LifeHandlerConfig_exemptionCheck
+end
+if LifeHandlerConfig_adminCommandsBypassMaxRegainedLives then
+    adminCommandsBypassMaxRegainedLives = LifeHandlerConfig_adminCommandsBypassMaxRegainedLives
 end
 
 do --Control API config transfer
@@ -398,7 +401,7 @@ function lifeHandler:onEvent(event)
                         local text
                         if target ~= nil then
                             local lifeLimiter = maxRegainedLives
-                            if adminBypassMaxRegainedLives then
+                            if adminCommandsBypassMaxRegainedLives then
                                 lifeLimiter = maxLives
                             end
                             if target ~= nil then
@@ -515,7 +518,7 @@ function lifeHandler:onEvent(event)
                         local text
                         if target ~= nil then
                             local lifeLimiter = maxRegainedLives
-                            if adminBypassMaxRegainedLives then
+                            if adminCommandsBypassMaxRegainedLives then
                                 lifeLimiter = maxLives
                             end
                             if target ~= nil then
