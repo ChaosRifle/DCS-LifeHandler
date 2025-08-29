@@ -1,4 +1,5 @@
 LifeHandler = true
+--version                           1.3
 --requires codebases:               tableIO and ChaosTools for logging/saving data
 --requires config file containing:  MissionName, FilePath
 --optional config file containing:  LifeHandlerConfig_MaxLives, LifeHandlerConfig_MaxRegainedLives, LifeHandlerConfig_SaveDataSubfolder, LifeHandlerConfig_saveDataPrefix, LifeHandlerConfig_exemptionCheck, LifeHandlerConfig_adminCommandsBypassMaxRegainedLives
@@ -28,7 +29,7 @@ end
 --default config, not recommended to change this. If you want something different, overwrite it with the respective public variable prefixed LifeHanderConfig_ as pointed out above
 local maxLives = 3
 local maxRegainedLives = 2
-local saveDataSubfolder = 'saves/'
+local saveDataSubfolder = [[saves\]]
 local saveDataPrefix = MissionName .. '_'
 local exemptionCheck = { -- aircraft **IN** this list **NOT** carrying the listed weapons will be exempt from losing lives. in other words, this is a list of banned weapons to allow the aircraft to be permitted to not use a life.
                         -- {Weapon.Category.SHELL, Weapon.Category.MISSILE, Weapon.Category.ROCKET, Weapon.Category.BOMB, Weapon.Category.TORPEDO}
@@ -49,24 +50,25 @@ local boolNumberConverter = {[true] = 1, [false] = 0}
 local adminCommandsBypassMaxRegainedLives = true
 
 
---load config data if it exists
-if LifeHandlerConfig_MaxLives then
-    maxLives = LifeHandlerConfig_MaxLives
-end
-if LifeHandlerConfig_MaxRegainedLives then
-    maxRegainedLives = LifeHandlerConfig_MaxRegainedLives
-end
-if LifeHandlerConfig_saveDataSubfolder then
-    saveDataSubfolder = LifeHandlerConfig_saveDataSubfolder
-end
-if LifeHandlerConfig_saveDataPrefix then
-    saveDataPrefix = LifeHandlerConfig_saveDataPrefix
-end
-if LifeHandlerConfig_exemptionCheck then
-    exemptionCheck = LifeHandlerConfig_exemptionCheck
-end
-if LifeHandlerConfig_adminCommandsBypassMaxRegainedLives then
-    adminCommandsBypassMaxRegainedLives = LifeHandlerConfig_adminCommandsBypassMaxRegainedLives
+do --load config data if it exists
+    if LifeHandlerConfig_MaxLives then
+        maxLives = LifeHandlerConfig_MaxLives
+    end
+    if LifeHandlerConfig_MaxRegainedLives then
+        maxRegainedLives = LifeHandlerConfig_MaxRegainedLives
+    end
+    if LifeHandlerConfig_saveDataSubfolder then
+        saveDataSubfolder = LifeHandlerConfig_saveDataSubfolder
+    end
+    if LifeHandlerConfig_saveDataPrefix then
+        saveDataPrefix = LifeHandlerConfig_saveDataPrefix
+    end
+    if LifeHandlerConfig_exemptionCheck then
+        exemptionCheck = LifeHandlerConfig_exemptionCheck
+    end
+    if LifeHandlerConfig_adminCommandsBypassMaxRegainedLives then
+        adminCommandsBypassMaxRegainedLives = LifeHandlerConfig_adminCommandsBypassMaxRegainedLives
+    end
 end
 
 do --Control API config transfer
@@ -85,8 +87,8 @@ do --Control API config transfer
 end
 
 
---main script
-if not FileExists(table.concat({FilePath, saveDataSubfolder, saveDataPrefix, 'LifeHandler_PlayersLives.lua'})) then                 --first boot prep
+--first boot prep
+if not FileExists(table.concat({FilePath, saveDataSubfolder, saveDataPrefix, 'LifeHandler_PlayersLives.lua'})) then
     local playerlist = net.get_player_list()
     local serverSpectatorInfo = net.get_player_info(playerlist[1])
     TableSave(table.concat({FilePath, saveDataSubfolder, saveDataPrefix, 'LifeHandler_PlayersLives.lua'}), {[serverSpectatorInfo.ucid] = { ['name'] = serverSpectatorInfo.name, ['lives'] = 1000, ['lifeInsurance'] = false }})
@@ -94,8 +96,9 @@ end
 
 
 local lifeHandler = {} --eventhandler
-local PlayersLives = TableLoad(table.concat({FilePath, saveDataSubfolder, saveDataPrefix, 'LifeHandler_PlayersLives.lua'}) )        --load data from file
-for key, value in pairs(PlayersLives) do --startup check to ensure if server shut down with players in flight, that their lives are returned.
+--load data from file and ensure if server shut down with players in flight, that their lives are returned.
+local PlayersLives = TableLoad(table.concat({FilePath, saveDataSubfolder, saveDataPrefix, 'LifeHandler_PlayersLives.lua'}) )
+for key, value in pairs(PlayersLives) do
     if value.lifeInsurance == true then
         PlayersLives[key].lives = PlayersLives[key].lives + 1
         value.lifeInsurance = false
@@ -174,14 +177,14 @@ function lifeHandler:onEvent(event)
             TableSave(table.concat({FilePath, saveDataSubfolder, saveDataPrefix, 'LifeHandler_PlayersLives.lua'}), PlayersLives)
             ChaosLog('LifeHandler: User exit unit', playerName)
         end
-    elseif event.id == world.event.S_EVENT_TAKEOFF then --unit takeoff
+    elseif event.id == world.event.S_EVENT_TAKEOFF then --unit takeoff - S_EVENT_RUNWAY_TAKEOFF might be advised here depending on results
         -- Event = {
         --   id = 3,
         --   time = Time,
         --   initiator = Unit,
         --   place = Airbase,
         --   subPlace = 0
-        -- }    
+        -- }
         local playerName = Unit.getPlayerName(event.initiator)
         if playerName then
             ChaosLog('LifeHandler: takeoff from airbase', event.place)
@@ -216,7 +219,7 @@ function lifeHandler:onEvent(event)
                     ChaosLog('LifeHandler: User takeoff with exemption', playerName)
                 else --code for normal execution
                     if PlayersLives[playerInfo.ucid].lives <= 0 then --player lacks lives
-                        trigger.action.outTextForUnit(Unit.getID(event.initiator), 'You have no lives remaining! Fly a logi/recon aircraft with a valid loadout (guns only), or take a non-pilot slot!', 60)
+                        trigger.action.outTextForUnit(Unit.getID(event.initiator), 'You have no lives remaining! Fly a logi/recon aircraft with a valid loadout (guns only), or take a non-pilot slot!', 120)
                         net.force_player_slot(playerInfo.id, playerInfo.side, '')
                         ChaosLog('LifeHandler: User takeoff resulted in kick due to lack of lives (must have been logi trying to take weapons again..)', playerName)
                     elseif PlayersLives[playerInfo.ucid].lives > 0 then --player has lives
@@ -322,10 +325,9 @@ function lifeHandler:onEvent(event)
             if PlayersLives[playerInfo.ucid].lives <= 0 then
                 trigger.action.outTextForUnit(Unit.getID(event.initiator), table.concat({'WARNING: Pilot has ', PlayersLives[playerInfo.ucid].lives, ' lives remaining! If your aircraft is not support and using a valid loadout when you take off, you will be kicked back to slot selection!'}), 60)
             else
-                trigger.action.outTextForUnit(Unit.getID(event.initiator), table.concat({'Pilot has ', PlayersLives[playerInfo.ucid].lives, ' live(s) remaining.'}), 20)
+                trigger.action.outTextForUnit(Unit.getID(event.initiator), table.concat({'Pilot has ', PlayersLives[playerInfo.ucid].lives, ' live(s) remaining.'}), 30)
             end
         end
-
     elseif event.id == world.event.S_EVENT_MARK_ADDED then -- marker commands                                           -- IDENTICAL TO S_EVENT_MARK_ADDED, S_EVENT_MARK_CHANGE
         -- Event = {
         --     id = 25,
@@ -389,7 +391,7 @@ function lifeHandler:onEvent(event)
                 trigger.action.outTextForUnit(Unit.getID(event.initiator), text, 20)
             end
             trigger.action.removeMark(event.idx)
-        elseif AdminList then 
+        elseif AdminList then
             local playerName = Unit.getPlayerName(event.initiator)
             if playerName then
                 local playerInfo = GetPlayerInfo(playerName)
@@ -413,7 +415,7 @@ function lifeHandler:onEvent(event)
                                     PlayersLives[target].lives = 0
                                     TableSave(table.concat({FilePath, saveDataSubfolder, saveDataPrefix, 'LifeHandler_PlayersLives.lua'}), PlayersLives)
                                     text = table.concat({'recoverable error, would have set user below 0 lives: ', 'life given to ', PlayersLives[target].name, ', they now have ', PlayersLives[target].lives, ' lives, with effectively ', PlayersLives[target].lives + boolNumberConverter[PlayersLives[target].lifeInsurance],  ' lives (lifeInsurance).',  })
-                                else
+                                else --between upper and lower bounds, act normal
                                     PlayersLives[target].lives = PlayersLives[target].lives + lifeModifier
                                     TableSave(table.concat({FilePath, saveDataSubfolder, saveDataPrefix, 'LifeHandler_PlayersLives.lua'}), PlayersLives)
                                     text = table.concat({'life given to ', PlayersLives[target].name, ', they now have ', PlayersLives[target].lives, ' lives, with effectively ', PlayersLives[target].lives + boolNumberConverter[PlayersLives[target].lifeInsurance],  ' lives (lifeInsurance).',  })
@@ -442,7 +444,6 @@ function lifeHandler:onEvent(event)
                 end
             end
         end
-
     elseif event.id == world.event.S_EVENT_MARK_CHANGE then -- marker commands                                          -- IDENTICAL TO S_EVENT_MARK_ADDED, S_EVENT_MARK_CHANGE
         -- Event = {
         --     id = 26,
@@ -506,7 +507,7 @@ function lifeHandler:onEvent(event)
                 trigger.action.outTextForUnit(Unit.getID(event.initiator), text, 20)
             end
             trigger.action.removeMark(event.idx)
-        elseif AdminList then 
+        elseif AdminList then
             local playerName = Unit.getPlayerName(event.initiator)
             if playerName then
                 local playerInfo = GetPlayerInfo(playerName)
