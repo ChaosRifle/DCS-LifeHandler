@@ -1,5 +1,5 @@
 LifeHandler = true
-local version = '1.5.11'
+local version = '1.5.12'
 --requires codebases:               tableIO and ChaosTools
 --requires config file containing:  MissionName, FilePath
 --optional config file containing:  LifeHandlerConfig_MaxLives, LifeHandlerConfig_MaxRegainedLives, LifeHandlerConfig_SaveDataSubfolder, LifeHandlerConfig_saveDataPrefix, LifeHandlerConfig_exemptionCheck, LifeHandlerConfig_adminCommandsBypassMaxRegainedLives
