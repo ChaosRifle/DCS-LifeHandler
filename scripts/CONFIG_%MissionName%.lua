@@ -22,5 +22,8 @@
 --     ['Mi-24P'] =        { Weapon.Category.MISSILE, Weapon.Category.ROCKET, Weapon.Category.BOMB, Weapon.Category.TORPEDO },
 -- }
 -- LifeHandlerConfig_adminCommandsBypassMaxRegainedLives = true
+-- AdminList = {
+--     ['5dbd35f7b27f6f7dd5be186c8b54e2c3'] = true, --chaos
+-- }
 
 ---------------------------------------------------------------- End LifeHandler ----------------------------------------------------------------
